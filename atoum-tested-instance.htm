@@ -132,7 +132,7 @@ class foo extends atoum
     public function testBar()
     {
         $this
-            ->if($this->newTestedInstance(uniqid(), uniqid())
+            ->if($this->newTestedInstance(uniqid(), uniqid()))
             ->then
                 ->object($this->testedInstance->bar())
                     ->isTestedInstance()
