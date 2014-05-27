@@ -57,7 +57,7 @@
     }
 }</code></pre>
 
-<p>Dans cet article nous allons découvrir comment créer un vocabulaire propre dans vos tests : en effet, atoum propose
+<p>Dans cet article nous allons découvrir comment créer un vocabulaire propre à vos tests : en effet, atoum propose
 une API pour <em>aliaser</em> les assertions natives ou en créer de nouvelles.</p>
 
 <p>Commençons par l'<em>aliasing</em>. Comme vous allez le voir, l'API est très simple et très naturelle :</p>
@@ -88,19 +88,19 @@ class stdClass extends atoum\test
 <p>Qu'est-ce que nous avons fait ici ? Nous avons tout simplement créé un alias pour l'assertion <code>string::isEqualTo</code>.
 Comme je vous le disais, l'API est très simple. Vous pourrez faire la même chose avec toutes les assertions natives d'atoum.</p>
 
-<p>Pendant l'écriture de certains tests, vous vous retrouverez peut-être à écrire souvent les même assertion pour valider
+<p>Pendant l'écriture de certains tests, vous vous retrouverez peut-être à écrire souvent les mêmes assertions pour valider
 les mêmes types de données. Par exemple, si vous écrivez une classe qui travaille avec des numéros de carte bleue, vous
 utiliserez certainement beaucoup l'assertion <code>string::match</code> pour valider le numéro à l'aide d'une expression
 rationnelle. Recopier ces assertions plusieurs fois peut poser problème :</p>
 
 <ul>
 <li>L'expression rationnelle sera écrite à plusieurs endroits dans la suite de test. Si elle doit changer, la maintenance
-sera plu compliquée</li>
+sera plus compliquée</li>
 <li>Les tests sont barbants à écrire</li>
 <li>Les tests ne sont pas très lisibles</li>
 </ul>
 
-<p>Voyonc comment corriger tout ces problème d'un coup :</p>
+<p>Voyonc comment corriger tout ces problèmes d'un coup :</p>
 
 <pre class="line-numbers"><code class="language-php">namespace tests\units;
 
@@ -134,8 +134,8 @@ class stdClass extends atoum\test
 <p>Plusieurs choses sont à noter ici :</p>
 
 <ul>
-<li>atoum cherche les assertions en parcourant une liste de namespaces dans lequels il cherche des classes qui étendent <code>mageekguy\atoum\asserters\string</code>.</li>
-<li>pour ajouter de nouveaux namespaces à cette liste, il faut appeler la méthode <code>addNamespace</code> du générateur d'assertion.</li>
+<li>atoum cherche les assertions en parcourant une liste de namespaces dans lesquels il cherche des classes qui étendent <code>mageekguy\atoum\asserters\string</code>.</li>
+<li>pour ajouter de nouveaux namespaces à cette liste, il faut appeler la méthode <code>addNamespace</code> du générateur d'assertions.</li>
 </ul>
 
 <p>Afin d'utiliser ces fonctionnalités de manière optimale, il sera préférable de centraliser toutes les classes de vos assertions
