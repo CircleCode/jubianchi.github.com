@@ -37,9 +37,10 @@
     </ul>
 </header>
     <article>
-            <time>
-        <strong>&nbsp;</strong>
-        <span>Draft</span>
+            <time datetime="2014-05-27 22:29:00">
+        <strong>May</strong>
+        <span>27</span>
+        <em>2014</em>
     </time>
 
         <header>
@@ -47,17 +48,16 @@
         </header>
 
         <div class="content">
-            <p>Cet article est le second d'une série qui va vous présenter les fonctionnalités à venir dans atoum.
-Ces fonctionnalités ne sont actuellement pas disponible sur le <code>master</code> d'atoum mais vous pouvez les
-tester en utilisant la branche <code>edge</code> :</p>
+            <p>Cet article est le second d'une série qui était censée vous présenter les fonctionnalités à venir dans atoum.
+<strong>Aujourd'hui, ces fonctionnalités sont disponible sur le <code>master</code> d'atoum.</strong></p>
 
 <pre class="line-numbers"><code class="language-javascript">{
     "require-dev": {
-        "atoum/atoum": "dev-edge"
+        "atoum/atoum": "dev-master"
     }
 }</code></pre>
 
-<p>Dans cette article, nous allons découvrir plusieurs nouveatés autour des <em>mock</em> dans atoum. L'API des mocks,
+<p>Dans cet article, nous allons découvrir plusieurs nouveatés autour des <em>mock</em> dans atoum. L'API des mocks,
 autant au niveau des controlleurs que des assertions, s'est vue dotée de plusieurs nouvelles petites fonctions
 qui vont vous permettre d'écrire des test encore plus clairs, plus facilement.</p>
 
@@ -80,7 +80,7 @@ class foo extends atoum
             )
             ->then
                 ->object($foo->bar())->isIdenticalTo($foo)
-                ->variable($foo->baz())->isNull($foo)
+                ->variable($foo->baz())->isNull
 
             ->if(
                 $foo = new \mock\jubianchi\atoum\preview\foo(),
@@ -114,7 +114,7 @@ class foo extends atoum
             )
             ->then
                 ->object($foo->bar())->isIdenticalTo($foo)
-                ->variable($foo->baz())->isNull($foo)
+                ->variable($foo->baz())->isNull
 
             ->if($this->calling($foo)->baz->doesSomething)
             ->then
@@ -188,9 +188,6 @@ soeurs, <code>twice</code> et <code>thrice</code>.</p>
 <p>Nous avons également introduit une nouvelles petites syntaxe dans atoum pour remplace les appels à <code>exactly</code> :
 vous pouvez maitenant utiliser <code>->{n}</code> (où <code>n</code> est un entier).</p>
 
-<p>N'oubliez pas que vous pouvez tester tout cela en utilisant la branche <code>edge</code> d'atoum. La <em>pull-request</em>
-contenant le code est disponible <a href="https://github.com/atoum/atoum/pull/320">ici</a> : n'hésitez pas à ajoutez vos commentaires.</p>
-
         </div>
 
         <footer>
@@ -203,7 +200,18 @@ contenant le code est disponible <a href="https://github.com/atoum/atoum/pull/32
         </footer>
     </article>
 
-    
+        <section class="disqus" id="disqus_thread"></section>
+
+    <script type="text/javascript">
+        var disqus_shortname = 'jubianchifr';
+
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+
 <hr/>
 
 <footer>&bull;&bull;&bull;</footer>

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>jubianchi.fr</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Julien Bianchi <contact@jubianchi.fr>">
+
+    <link href="data:image/x-icon;base64,AAABAAEAEBAQAAAAAAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAenp6AO6//wD///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABERERERAAABEQAAAAEQABIhARARASIAEiERERERIgAREAERAQARABETARERMBEAEREREREREQABEREREREQAAEREAABERAAAREAAAABEAABEAAAAAEQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAA4AcAAMADAACAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAQAAgAEAAIPBAACH4QAAz/MAAP//AAD//wAA" rel="icon" type="image/x-icon" />
+
+    <link href='http://fonts.googleapis.com/css?family=Exo+2:400,100,200,300' rel='stylesheet' type='text/css'>
+    <link href="styles/ui.css" rel="stylesheet">
+
+    <link href="js/prismjs/prism.css" rel="stylesheet" />
+    <link href="js/prismjs/prism-okaidia.css" rel="stylesheet" />
+    <link href="js/prismjs/plugins/line-numbers/prism-line-numbers.css" rel="stylesheet" />
+    <link href="styles/github.css" rel="stylesheet" />
+
+    <script src="js/jquery.js"></script>
+</head>
+
+<body>
+
+<header>
+    <a href="index.htm"><img class="avatar" src="images/nyantocat.gif"/></a>
+
+    <h1>Julien Bianchi <small><em>aka jubianchi</em></small></h1>
+
+    <ul>
+        <li><a href="mailto:contact@jubianchi.fr" title="email">email</a></li>
+        <li><a href="https://twitter.com/jubianchi" title="twitter">twitter</a></li>
+        <li><a href="https://github.com/jubianchi" title="github">github</a></li>
+        <li><a href="https://speakerdeck.com/jubianchi" title="speakerdeck">speakerdeck</a></li>
+        <li><a href="https://coderwall.com/jubianchi" title="coderwall">coderwall</a></li>
+        <li><a href="http://osrc.dfm.io/jubianchi" title="Open Source Report Card">OSRC</a></li>
+        <li><a href="cv/index.html" title="jubianchi.fr">CV</a></li>
+    </ul>
+</header>
+    <article>
+            <time datetime="2014-05-27 23:29:00">
+        <strong>May</strong>
+        <span>27</span>
+        <em>2014</em>
+    </time>
+
+        <header>
+            <h1>atoum feature preview #3 : aliasing</h1>
+        </header>
+
+        <div class="content">
+            <p>Cet article est le second d'une série qui était censée vous présenter les fonctionnalités à venir dans atoum.
+<strong>Aujourd'hui, ces fonctionnalités sont disponible sur le <code>master</code> d'atoum.</strong></p>
+
+<pre class="line-numbers"><code class="language-javascript">{
+    "require-dev": {
+        "atoum/atoum": "dev-master"
+    }
+}</code></pre>
+
+<p>Dans cet article nous allons découvrir comment créer un vocabulaire propre dans vos tests : en effet, atoum propose
+une API pour <em>aliaser</em> les assertions natives ou en créer de nouvelles.</p>
+
+<p>Commençons par l'<em>aliasing</em>. Comme vous allez le voir, l'API est très simple et très naturelle :</p>
+
+<pre class="line-numbers"><code class="language-php">namespace tests\units;
+
+use mageekguy\atoum;
+
+class stdClass extends atoum\test
+{
+    public function __construct(adapter $adapter = null, annotations\extractor $annotationExtractor = null, asserter\generator $asserterGenerator = null, test\assertion\manager $assertionManager = null, \closure $reflectionClassFactory = null)
+    {
+        parent::__construct($adapter, $annotationExtractor, $asserterGenerator, $assertionManager, $reflectionClassFactory);
+
+        $this
+            ->from('string')->use('isEqualTo')->as('equals')
+        ;
+    }
+
+    public function testFoo()
+    {
+        $this
+            ->string($u = uniqid())->equals($u)
+        ;
+    }
+}</code></pre>
+
+<p>Qu'est-ce que nous avons fait ici ? Nous avons tout simplement créé un alias pour l'assertion <code>string::isEqualTo</code>.
+Comme je vous le disais, l'API est très simple. Vous pourrez faire la même chose avec toutes les assertions natives d'atoum.</p>
+
+<p>Pendant l'écriture de certains tests, vous vous retrouverez peut-être à écrire souvent les même assertion pour valider
+les mêmes types de données. Par exemple, si vous écrivez une classe qui travaille avec des numéros de carte bleue, vous
+utiliserez certainement beaucoup l'assertion <code>string::match</code> pour valider le numéro à l'aide d'une expression
+rationnelle. Recopier ces assertions plusieurs fois peut poser problème :</p>
+
+<ul>
+<li>L'expression rationnelle sera écrite à plusieurs endroits dans la suite de test. Si elle doit changer, la maintenance
+sera plu compliquée</li>
+<li>Les tests sont barbants à écrire</li>
+<li>Les tests ne sont pas très lisibles</li>
+</ul>
+
+<p>Voyonc comment corriger tout ces problème d'un coup :</p>
+
+<pre class="line-numbers"><code class="language-php">namespace tests\units;
+
+use mageekguy\atoum;
+
+class creditcard extends atoum\asserters\string
+{
+    public function isValid($failMessage = null)
+    {
+        return $this->match('/(?:\d{4}){4}/', $failMessage ?: $this->_('%s is not a valid credit card number', $this));
+    }
+}
+
+class stdClass extends atoum\test
+{
+    public function __construct(adapter $adapter = null, annotations\extractor $annotationExtractor = null, asserter\generator $asserterGenerator = null, test\assertion\manager $assertionManager = null, \closure $reflectionClassFactory = null)
+    {
+        parent::__construct($adapter, $annotationExtractor, $asserterGenerator, $assertionManager, $reflectionClassFactory);
+
+        $this->getAsserterGenerator()->addNamespace('tests\units');
+    }
+
+    public function testFoo()
+    {
+        $this
+            ->creditcard('4444555566660000')->isValid()
+        ;
+    }
+}</code></pre>
+
+<p>Plusieurs choses sont à noter ici :</p>
+
+<ul>
+<li>atoum cherche les assertions en parcourant une liste de namespaces dans lequels il cherche des classes qui étendent <code>mageekguy\atoum\asserters\string</code>.</li>
+<li>pour ajouter de nouveaux namespaces à cette liste, il faut appeler la méthode <code>addNamespace</code> du générateur d'assertion.</li>
+</ul>
+
+<p>Afin d'utiliser ces fonctionnalités de manière optimale, il sera préférable de centraliser toutes les classes de vos assertions
+dans un namespace dédié de votre projet. De même, pour les alias, il sera préférable de les définir dans une classe
+qui étend <code>mageekguy\atoum\test</code>. Vos classes de tests étendront ensuite simplement cette classe. Voici un exemple :</p>
+
+<pre class="line-numbers"><code class="language-php">namespace my\project {
+    // ...
+}
+
+namespace my\project\tests {
+    use mageekguy\atoum;
+
+    class test extends atoum\test
+    {
+        public function __construct(adapter $adapter = null, annotations\extractor $annotationExtractor = null, asserter\generator $asserterGenerator = null, test\assertion\manager $assertionManager = null, \closure $reflectionClassFactory = null)
+        {
+            parent::__construct($adapter, $annotationExtractor, $asserterGenerator, $assertionManager, $reflectionClassFactory);
+
+            $this->getAsserterGenerator()->addNamespace(__NAMESPACE__ . '\asserters');
+
+            $this
+                ->from('string')->use('isEqualTo')->as('equals')
+                ->from('integer')->use('isEqualTo')->as('equals')
+                // ...
+            ;
+        }
+    }
+}
+
+namespace my\project\tests\asserters {
+    use mageekguy\atoum;
+
+    class creditcard extends atoum\asserters\string { /*...*/ }
+    class zipcode extends atoum\asserters\string { /*...*/ }
+}
+
+namespace my\project\tests\units {
+    use my\project\tests;
+
+    class foo extends tests\test
+    {
+        public function testFoo()
+        {
+            $this
+                ->string($u = uniqid())->equals($u)
+                ->creditcard('4444555566660000')->isValid()
+            ;
+        }
+    }
+}
+</code></pre>
+
+<p>Je vous laisse découvrir ces fonctionnélités plus en détails en les utilisant. Si vous avez besoin d'aide, vous pouvez toujours
+nous rejoindre sur IRC (<code>freenode##atoum</code>).</p>
+
+        </div>
+
+        <footer>
+                <ul class="inline">
+        <li class="legend">Publié dans :</li>
+                    <li>php</li>
+                    <li>atoum</li>
+                    <li>test</li>
+            </ul>
+        </footer>
+    </article>
+
+        <section class="disqus" id="disqus_thread"></section>
+
+    <script type="text/javascript">
+        var disqus_shortname = 'jubianchifr';
+
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+
+<hr/>
+
+<footer>&bull;&bull;&bull;</footer>
+
+<script src="js/prismjs/prism.js"></script>
+<script src="js/prismjs/components/prism-bash.js"></script>
+<script src="js/prismjs/components/prism-php.js"></script>
+<script src="js/prismjs/components/prism-php-extras.js"></script>
+<script src="js/prismjs/components/prism-css.js"></script>
+<script src="js/prismjs/plugins/line-numbers/prism-line-numbers.js"></script>
+<script src="js/jquery.github.js"></script>
+<script>$(function() { $("[data-repo]").github(); });</script>
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-10349389-8', 'jubianchi.fr');
+    ga('send', 'pageview');
+
+</script>
+</body>
+</html>
